@@ -1,38 +1,90 @@
-# Entretiens-Cohort360
+# 🏥 Entretiens Cohort360
 
-Projet – Exercices Fullstack & Data
+> **Projet d'exercices techniques Fullstack & Data**
 
-Ce projet regroupe trois repositories distincts, chacun correspondant à un exercice technique différent :
+Ce projet regroupe trois repositories distincts, chacun correspondant à un exercice technique différent dans le contexte
+d'une application médicale.
 
-📦 Contenu du projet
+---
 
-🖥️ Frontend
-Exercice de développement côté client.
+## 🎯 Exercice Principal : API Fullstack Prescriptions Médicamenteuses
 
-⚙️ Backend Django
-Exercice de développement backend avec le framework Django.
+L'objectif principal de ces exercices est de **développer une nouvelle route API REST pour gérer les prescriptions
+médicamenteuses des patients** et d'exposer ces données de manière complète et utilisable.
 
-📊 Backend Scala / Spark (optionnel)
-Exercice orienté traitement de données avec Scala et Apache Spark.
+### Fonctionnalités attendues :
 
-🔗 Dépendances entre les exercices
+- ✅ Créer un modèle de données pour les prescriptions (lien Patient ↔ Médicament)
+- ✅ Implémenter des endpoints REST (GET, POST, PUT/PATCH)
+- ✅ Ajouter des filtres avancés (patient, médicament, dates, statut)
+- ✅ Exposer, consommer ces données dans le frontend et permettre l'ajout de nouvelles prescriptions
 
-Les exercices Backend Django et Frontend sont liés entre eux et doivent être réalisés dans l’ordre suivant :
+---
 
-Commencer par l’exercice Backend Django
+## 📦 Structure du Projet
 
-Poursuivre avec l’exercice Frontend, qui consomme l’API exposée par le backend
+Le projet est organisé en trois sous-repositories indépendants :
 
-Le troisième exercice :
+### 1. 🖥️ **Frontend**
 
-Backend Scala / Spark est indépendant des deux autres
+Exercice de développement côté client pour afficher et interagir avec les données de prescriptions.
 
-Il est optionnel
+**Voir** → [`/Exercice_Front/README.md`](./Exercice_Front/README.md) pour l'énoncé détaillé
 
-▶️ Ordre recommandé
+---
 
-Backend Django
+### 2. ⚙️ **Backend Django**
 
-Frontend
+Exercice backend avec Django REST Framework pour créer l'API de gestion des prescriptions.
 
-Scala / Spark (optionnel)
+**Voir** → [`/Exercice_Django/README.md`](./Exercice_Django/README.md) pour l'énoncé détaillé
+
+---
+
+### 3. 📊 **Backend Scala / Spark** *(optionnel)*
+
+Exercice orienté traitement de données massives avec Scala et Apache Spark.
+
+**Voir** → [`/Exercice_scala_spark/README.md`](./Exercice_scala_spark/README.md) pour l'énoncé détaillé
+
+---
+
+## 🔗 Dépendances entre les Exercices
+
+Les exercices **Backend Django** et **Frontend** sont **liés** et doivent être réalisés dans l'ordre :
+
+1. **Backend Django** : Créer l'API REST pour les prescriptions
+2. **Frontend** : Consommer l'API Django, afficher les données, permettre l'ajout de nouvelles prescriptions
+
+Le troisième exercice (**Scala/Spark**) est :
+
+- ✨ **Indépendant** des deux autres
+- 🎁 **Optionnel**
+
+---
+
+## ▶️ Ordre Recommandé de Réalisation
+
+| Ordre | Exercice           | Statut      | Durée estimée |
+|-------|--------------------|-------------|---------------|
+| 1️⃣   | **Backend Django** | Obligatoire | ~1h           |
+| 2️⃣   | **Frontend**       | Obligatoire | ~2-3h         |
+| 3️⃣   | **Scala/Spark**    | Optionnel   | <1h           |
+
+---
+
+## 📖 Documentation
+
+Chaque sous-repository contient son propre **README détaillé** avec :
+
+- 📋 L'énoncé complet de l'exercice
+- 🛠️ Les instructions d'installation
+- 🚀 Les commandes de lancement
+- ✅ Les critères d'acceptation
+
+**Consultez les README individuels pour commencer !**
+
+---
+
+**Bon courage ! 🎓**
+
