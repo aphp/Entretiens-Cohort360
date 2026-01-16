@@ -25,6 +25,7 @@ L'exercice consiste à coder la fonction scala de ce moteur de requêtes.
 
 Pour réaliser cet exercice, vous devez installer Docker, Java et SBT. Voici les instructions détaillées pour chaque
 outil.
+Avant tout , vous devez vous placer dans le dossier `Exercice_scala_spark`.
 
 ### 1. Docker et Docker Compose
 
@@ -135,7 +136,7 @@ sdk install sbt
 ## Objectif de l'exercice
 
 Le candidat doit compléter la classe `CohortSearchEngine.scala` pour implémenter la méthode `runSearch` capable de
-traiter une requête de cohorte dynamique.
+traiter une requête json en entrée de manière dynamique (s'adaptant aux critères de la requête).
 
 ### Les règles de gestion sont :
 
