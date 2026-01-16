@@ -86,7 +86,7 @@ Chaque sous-repository contient son propre **README détaillé** avec :
 
 ## 📖 Rendu
 
-Vous pouvez fork le repository afin de recuperer le code existant puis nous soumettre l'utl de votre repo par e-mail.
+Vous pouvez fork ce repository afin de recuperer le code existant et lancer le projet facilement, puis nous soumettre l'URL de votre repo par e-mail.
 
 
 ---
