@@ -1,0 +1,35 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "ui": "tui",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": ["dist/**", ".next/**", "build/**", "target/**"]
+    },
+    "lint": {
+      "inputs": ["$TURBO_DEFAULT$", "eslint.config.*", ".eslintrc*", "pyproject.toml"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "test": {
+      "inputs": ["$TURBO_DEFAULT$", "**/*.test.*", "**/*.spec.*", "**/test_*.py"],
+      "outputs": ["coverage/**"]
+    },
+    "typecheck": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", "tsconfig.json"]
+    },
+    "migrate": {
+      "cache": false
+    },
+    "seed": {
+      "cache": false
+    },
+    "clean": {
+      "cache": false
+    }
+  }
+}

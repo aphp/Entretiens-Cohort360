@@ -1,0 +1,49 @@
+# Docker Compose for Cohort360 Development
+# =========================================
+#
+# Usage:
+#   docker compose up -d        # Start all services
+#   docker compose logs -f      # View logs
+#   docker compose down         # Stop all services
+
+services:
+  # Django API Backend
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=1
+      - DATABASE_URL=sqlite:///db.sqlite3
+    volumes:
+      - ./apps/api:/app
+      - api-venv:/app/.venv
+    command: uv run python manage.py runserver 0.0.0.0:8000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/admin/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # React Frontend
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://api:8000
+    volumes:
+      - ./apps/web:/app
+      - web-node-modules:/app/node_modules
+    command: npm run dev -- --host
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  api-venv:
+  web-node-modules:

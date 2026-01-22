@@ -1,0 +1,135 @@
+# CI/CD Pipeline for Cohort360
+# =============================
+#
+# Runs on every push and pull request:
+# - Lint and type check
+# - Unit tests (Django + React)
+# - E2E tests (Playwright)
+
+name: CI
+
+on:
+  push:
+    branches: [main, 'feature/**', 'boilerplate/**']
+  pull_request:
+    branches: [main]
+
+env:
+  NODE_VERSION: '22'
+  PYTHON_VERSION: '3.12'
+
+jobs:
+  # ==========================================================================
+  # Backend Tests (Django)
+  # ==========================================================================
+  backend:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Install dependencies
+        working-directory: apps/api
+        run: uv sync
+
+      - name: Run migrations
+        working-directory: apps/api
+        run: uv run python manage.py migrate
+
+      - name: Run tests
+        working-directory: apps/api
+        run: uv run python manage.py test medical.tests --verbosity=2
+
+  # ==========================================================================
+  # Frontend Tests (React)
+  # ==========================================================================
+  frontend:
+    name: Frontend Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        working-directory: apps/web
+        run: npm run typecheck
+
+      - name: Lint
+        working-directory: apps/web
+        run: npm run lint
+
+      - name: Run tests
+        working-directory: apps/web
+        run: npm test
+
+  # ==========================================================================
+  # E2E Tests (Playwright)
+  # ==========================================================================
+  e2e:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    needs: [backend, frontend]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Install Python dependencies
+        working-directory: apps/api
+        run: uv sync
+
+      - name: Run migrations
+        working-directory: apps/api
+        run: uv run python manage.py migrate
+
+      - name: Seed demo data
+        working-directory: apps/api
+        run: uv run python manage.py seed_demo --patients 10 --medications 10
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run E2E tests
+        run: npx playwright test --project=chromium
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7

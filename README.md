@@ -1,95 +1,180 @@
-# 🏥 Entretiens Cohort360
+# 🏥 Cohort360 Fullstack Exercise - Starter
 
-> **Projet d'exercices techniques Fullstack & Data**
+> **Turborepo monorepo starter for the AP-HP technical interview**
 
-Ce projet regroupe trois repositories distincts, chacun correspondant à un exercice technique différent dans le contexte
-d'une application médicale.
-
----
-
-## 🎯 Exercice Principal : API Fullstack Prescriptions Médicamenteuses
-
-L'objectif principal de ces exercices est de **développer une nouvelle route API REST pour gérer les prescriptions
-médicamenteuses des patients** et d'exposer ces données de manière complète et utilisable.
-
-### Fonctionnalités attendues :
-
-- ✅ Créer un modèle de données pour les prescriptions (lien Patient ↔ Médicament)
-- ✅ Implémenter des endpoints REST (GET, POST, PUT/PATCH)
-- ✅ Ajouter des filtres avancés (patient, médicament, dates, statut)
-- ✅ Exposer, consommer ces données dans le frontend et permettre l'ajout de nouvelles prescriptions
+This is the **starter template** for building the Prescription Management API and UI.
+The Patient and Medication models are pre-implemented; your task is to add the Prescription feature.
 
 ---
 
-## 📦 Structure du Projet
+## 🚀 Quick Start
 
-Le projet est organisé en trois sous-repositories indépendants :
+### Prerequisites
 
-### 1. 🖥️ **Frontend**
+- **Node.js** 22+ and npm
+- **Python** 3.12+ with [uv](https://docs.astral.sh/uv/)
+- **Git**
 
-Exercice de développement côté client pour afficher et interagir avec les données de prescriptions.
+### Setup
 
-**Voir** → [`/Exercice_Front/README.md`](./Exercice_Front/README.md) pour l'énoncé détaillé
+```bash
+# Clone and install
+git clone https://github.com/aphp/Entretiens-Cohort360.git
+cd Entretiens-Cohort360
+git checkout boilerplate/starter
+npm install
 
----
+# Setup Django
+cd apps/api
+uv sync
+uv run python manage.py migrate
+uv run python manage.py seed_demo --patients 100 --medications 30
+cd ../..
 
-### 2. ⚙️ **Backend Django**
+# Start development
+npm run dev
+```
 
-Exercice backend avec Django REST Framework pour créer l'API de gestion des prescriptions.
+### Access
 
-**Voir** → [`/Exercice_Django/README.md`](./Exercice_Django/README.md) pour l'énoncé détaillé
-
----
-
-### 3. 📊 **Backend Scala / Spark** *(optionnel)*
-
-Exercice orienté traitement de données massives avec Scala et Apache Spark.
-
-**Voir** → [`/Exercice_scala_spark/README.md`](./Exercice_scala_spark/README.md) pour l'énoncé détaillé
-
----
-
-## 🔗 Dépendances entre les Exercices
-
-Les exercices **Backend Django** et **Frontend** sont **liés** et doivent être réalisés dans l'ordre :
-
-1. **Backend Django** : Créer l'API REST pour les prescriptions
-2. **Frontend** : Consommer l'API Django, afficher les données, permettre l'ajout de nouvelles prescriptions
-
-Le troisième exercice (**Scala/Spark**) est :
-
-- ✨ **Indépendant** des deux autres
-- 🎁 **Optionnel**
+- **Frontend**: http://localhost:5173
+- **API**: http://localhost:8000
+- **API Docs**: http://localhost:8000/admin/
 
 ---
 
-## ▶️ Ordre Recommandé de Réalisation
+## 📋 Exercise Overview
 
-| Ordre | Exercice           | Statut      | Durée estimée |
-|-------|--------------------|-------------|---------------|
-| 1️⃣   | **Backend Django** | Obligatoire | ~1h           |
-| 2️⃣   | **Frontend**       | Obligatoire | ~2-3h         |
-| 3️⃣   | **Scala/Spark**    | Optionnel   | <1h           |
+| Exercise | Estimated Time | Documentation |
+|----------|----------------|---------------|
+| **Backend (Django)** | ~1h | [docs/exercises/django/README.md](docs/exercises/django/README.md) |
+| **Frontend (React)** | ~1h30-2h | [docs/exercises/react/README.md](docs/exercises/react/README.md) |
+
+### What's Pre-Implemented ✅
+
+- Patient model and API (`GET /Patient`)
+- Medication model and API (`GET /Medication`)
+- Django REST Framework setup with pagination
+- React app with TanStack Query
+- Axios API client
+- TypeScript types
+- Test scaffolds
+- E2E test patterns
+
+### What You Need to Build 🔨
+
+1. **Django Prescription Model**
+   - ForeignKey to Patient and Medication
+   - Date range (start_date, end_date)
+   - Status enum (valide, en_attente, suppr)
+
+2. **Django Prescription API**
+   - `GET /Prescription` with filters
+   - `POST /Prescription`
+   - `PATCH /Prescription/:id`
+
+3. **React Prescription UI**
+   - List with pagination
+   - Create/Edit forms
+   - Filters
+   - Soft delete
 
 ---
 
-## 📖 Documentation
+## 🏗️ Project Structure
 
-Chaque sous-repository contient son propre **README détaillé** avec :
-
-- 📋 L'énoncé complet de l'exercice
-- 🛠️ Les instructions d'installation
-- 🚀 Les commandes de lancement
-- ✅ Les critères d'acceptation
-
-**Consultez les README individuels pour commencer !**
-
-## 📖 Rendu
-
-Vous pouvez fork ce repository afin de recuperer le code existant et lancer le projet facilement, puis nous soumettre l'URL de votre repo par e-mail.
-
+```
+├── apps/
+│   ├── api/                 # Django REST API
+│   │   ├── config/          # Django settings
+│   │   └── medical/         # Medical app
+│   │       ├── models.py    # Patient, Medication (+ TODO: Prescription)
+│   │       ├── views.py     # ViewSets (+ TODO: PrescriptionViewSet)
+│   │       └── tests/       # API tests
+│   └── web/                 # React frontend
+│       └── src/
+│           ├── App.tsx      # Main component (TODO: build UI)
+│           ├── api/         # API client
+│           └── types/       # TypeScript interfaces
+├── docs/exercises/          # Exercise specifications
+├── e2e/                     # Playwright E2E tests
+├── packages/                # Shared configs
+├── docker-compose.yml       # Docker development
+└── .github/workflows/       # CI pipeline
+```
 
 ---
 
-**Bon courage ! 🎓**
+## 🧪 Testing
+
+```bash
+# Django unit tests
+cd apps/api && uv run python manage.py test
+
+# React unit tests
+cd apps/web && npm test
+
+# E2E tests
+npm run test:e2e
+```
+
+---
+
+## 🐳 Docker (Optional)
+
+```bash
+docker compose up -d
+```
+
+---
+
+## 📖 Resources
+
+- [Django REST Framework](https://www.django-rest-framework.org/)
+- [TanStack Query](https://tanstack.com/query)
+- [React Hook Form](https://react-hook-form.com/)
+- [Playwright](https://playwright.dev/)
+
+---
+
+## ✅ Acceptance Criteria
+
+### Backend (MVP ~1h)
+
+- [ ] Prescription model with all required fields
+- [ ] GET /Prescription with pagination
+- [ ] POST /Prescription with validation
+- [ ] PATCH /Prescription/:id
+- [ ] Filters: patient, medication, status, date ranges
+- [ ] Unit tests passing
+
+### Frontend
+
+#### MVP (~2h)
+- [ ] Prescription list with table
+- [ ] Create prescription form
+- [ ] Loading and error states
+
+#### Stretch Goals (+1h)
+- [ ] Edit prescription form
+- [ ] Filter controls (patient, medication, status, dates)
+- [ ] Soft delete (status → 'suppr')
+- [ ] Unit tests passing
+
+---
+
+## 📦 Tech Stack
+
+| Layer | Technology | Purpose |
+|-------|------------|---------|
+| Backend | Django 5.2 + DRF | REST API |
+| Frontend | React 19 + TypeScript | UI |
+| Forms | React Hook Form + Zod | Validation |
+| State | TanStack Query | Server state |
+| Testing | Vitest + Playwright | Unit + E2E |
+| DevOps | Docker + GitHub Actions | CI/CD |
+
+---
+
+**Good luck! 🎓**
 
