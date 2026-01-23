@@ -59,9 +59,9 @@ python manage.py migrate
 ```
 
 3) Générer des données fictives
-
+   (cela peut prendre plusieurs secondes)
 ```bash
-python manage.py seed_demo --patients 100 --medications 30
+python manage.py seed_demo --patients 2500 --medications 150 
 ```
 
 5) Lancer le serveur de développement

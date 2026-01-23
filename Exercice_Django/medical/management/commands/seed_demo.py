@@ -7,7 +7,7 @@ from django.core.management.base import BaseCommand
 from medical.models import Patient, Medication
 
 
-def random_date(start_year=1940, end_year=2020):
+def random_date(start_year=1940, end_year=2025):
     start_dt = date(start_year, 1, 1)
     end_dt = date(end_year, 12, 31)
     days = (end_dt - start_dt).days
@@ -30,10 +30,30 @@ class Command(BaseCommand):
         last_names = [
             "Martin", "Bernard", "Thomas", "Petit", "Robert",
             "Richard", "Durand", "Dubois", "Moreau", "Laurent",
+            "Michel", "Garcia", "David", "Bertrand", "Roux",
+            "Vincent", "Fournier", "Morel", "Lefebvre", "Mercier",
+            "Dupont", "Lambert", "Bonnet", "Francois", "Martinez",
+            "Legrand", "Garnier", "Faure", "Andre", "Rousseau",
+            "Simon", "Leroy", "Roux", "Girard", "Colin",
+            "Lefevre", "Boyer", "Chevalier", "Robin", "Masson",
+            "Picard", "Blanc", "Gautier", "Nicolas", "Henry",
+            "Perrin", "Morin", "Mathieu", "Clement", "Gauthier",
+            "Dumont", "Lopez", "Fontaine", "Schmitt", "Rodriguez",
+            "Dufour", "Blanchard", "Meunier", "Brunet", "Roy"
         ]
         first_names = [
             "Jean", "Jeanne", "Marie", "Luc", "Lucie",
             "Paul", "Camille", "Pierre", "Sophie", "Emma",
+            "Louis", "Louise", "Alice", "Gabriel", "Jules",
+            "Lucas", "Hugo", "Arthur", "Adam", "Raphael",
+            "Leo", "Nathan", "Tom", "Zoe", "Chloe",
+            "Ines", "Lea", "Lena", "Eva", "Nina",
+            "Ethan", "Noah", "Liam", "Rose", "Anna",
+            "Jade", "Maeva", "Sarah", "Laura", "Clara",
+            "Julie", "Nicolas", "Thomas", "Antoine", "Emilie",
+            "Mathilde", "Charlotte", "Manon", "Julia", "Elise",
+            "Victor", "Alex", "Samuel", "Valentin", "Axel",
+            "Simon", "Romain", "Vincent", "Marc", "David"
         ]
 
         created_patients = []
@@ -48,6 +68,14 @@ class Command(BaseCommand):
         base_labels = [
             "Paracetamol", "Ibuprofen", "Amoxicillin", "Aspirin", "Omeprazole",
             "Metformin", "Loratadine", "Cetirizine", "Azithromycin", "Atorvastatin",
+            "Simvastatin", "Lisinopril", "Amlodipine", "Metoprolol", "Sertraline",
+            "Fluoxetine", "Escitalopram", "Gabapentin", "Pregabalin", "Tramadol",
+            "Oxycodone", "Hydrocodone", "Morphine", "Diazepam", "Alprazolam",
+            "Clonazepam", "Zolpidem", "Trazodone", "Cyclobenzaprine", "Meloxicam",
+            "Prednisone", "Methylprednisolone", "Hydrocortisone", "Fluticasone", "Montelukast",
+            "Albuterol", "Fluconazole", "Terbinafine", "Metronidazole", "Ciprofloxacin",
+            "Doxycycline", "Cephalexin", "Nitrofurantoin", "Pantoprazole", "Ranitidine",
+            "Famotidine", "Dicyclomine", "Ondansetron", "Promethazine", "Meclizine",
         ]
         created_meds = []
         for i in range(n_meds):
