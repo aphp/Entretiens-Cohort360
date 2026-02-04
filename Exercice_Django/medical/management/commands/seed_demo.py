@@ -4,28 +4,42 @@ from datetime import date, timedelta
 
 from django.core.management.base import BaseCommand
 
-from medical.models import Patient, Medication
+from medical.models import Patient, Medication, Prescription
 
 
 def random_date(start_year=1940, end_year=2025):
     start_dt = date(start_year, 1, 1)
     end_dt = date(end_year, 12, 31)
-    days = (end_dt - start_dt).days
-    return start_dt + timedelta(days=random.randint(0, days))
+    max_days = (end_dt - start_dt).days
+    return start_dt + timedelta(days=random.randint(0, max_days))
+
+
+def random_interval_between(not_before_date, not_after_date):
+    delta_days = (not_after_date - not_before_date).days
+    steps = [random.randint(0, delta_days), random.randint(0, delta_days)]
+    steps.sort()
+    first_delta_days, second_delta_days = steps
+    first_date = not_before_date + timedelta(days=first_delta_days)
+    second_date = not_before_date + timedelta(days=second_delta_days)
+    return (first_date, second_date)
 
 
 class Command(BaseCommand):
     Patient.objects.all().delete()
     Medication.objects.all().delete()
-    help = "Seed the database with demo Patients and Medications"
+    Prescription.objects.all().delete()
+
+    help = "Seed the database with demo Patients, Medications and Prescriptions"
 
     def add_arguments(self, parser):
         parser.add_argument("--patients", type=int, default=10)
         parser.add_argument("--medications", type=int, default=5)
+        parser.add_argument("--prescriptions", type=int, default=30)
 
     def handle(self, *args, **options):
         n_patients = options["patients"]
         n_meds = options["medications"]
+        n_prescriptions = options["prescriptions"]
 
         last_names = [
             "Martin",
@@ -226,8 +240,24 @@ class Command(BaseCommand):
             m = Medication.objects.create(code=code, label=label, status=status)
             created_meds.append(m)
 
+        created_prescriptions = []
+        end_of_current_year = date(year=date.today().year, month=12, day=31)
+        for _ in range(n_prescriptions):
+            patient = random.choice(created_patients)
+            prescription_begins, prescription_ends = random_interval_between(
+                patient.birth_date, end_of_current_year
+            )
+            p = Prescription.objects.create(
+                patient=patient,
+                medication=random.choice(created_meds),
+                status=random.choice([k for k, _ in Prescription.STATUS_CHOICES]),
+                begin_date=prescription_begins,
+                end_date=prescription_ends,
+            )
+            created_prescriptions.append(p)
+
         self.stdout.write(
             self.style.SUCCESS(
-                f"Created {len(created_patients)} patients and {len(created_meds)} medications."
+                f"Created {len(created_patients)} patient(s), {len(created_meds)} medication(s) and {len(created_prescriptions)} prescription(s)."
             )
         )
