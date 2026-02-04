@@ -25,6 +25,8 @@ def random_interval_between(not_before_date, not_after_date):
 
 
 class Command(BaseCommand):
+    # TODO when the running env is handled, disable this command when env==production
+    # TODO move those `delete()` into `handle()` to avoid clearing data if validation fails
     Patient.objects.all().delete()
     Medication.objects.all().delete()
     Prescription.objects.all().delete()
@@ -40,6 +42,8 @@ class Command(BaseCommand):
         n_patients = options["patients"]
         n_meds = options["medications"]
         n_prescriptions = options["prescriptions"]
+        # TODO validation for prescription count != 0 and no patient or no medication
+        # TODO use Django's batch creation
 
         last_names = [
             "Martin",
@@ -228,7 +232,7 @@ class Command(BaseCommand):
             "Meclizine",
         ]
         created_meds = []
-        for i in range(n_meds):
+        for _ in range(n_meds):
             code = f"MED{random.randint(1000, 9999)}{random.choice(string.ascii_uppercase)}"
             label = (
                 f"{random.choice(base_labels)} {random.choice([15, 20, 25, 50, 100, 200, 250, 300, 400, 500, 800, 1000])}"
