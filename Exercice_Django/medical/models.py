@@ -27,7 +27,9 @@ class Medication(models.Model):
 
     code = models.CharField(max_length=64, unique=True)
     label = models.CharField(max_length=255)
-    status = models.CharField(max_length=16, choices=STATUS_CHOICES, default=STATUS_ACTIF)
+    status = models.CharField(
+        max_length=16, choices=STATUS_CHOICES, default=STATUS_ACTIF
+    )
 
     class Meta:
         ordering = ["code"]
