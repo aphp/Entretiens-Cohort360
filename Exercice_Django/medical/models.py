@@ -36,3 +36,25 @@ class Medication(models.Model):
 
     def __str__(self) -> str:  # pragma: no cover - simple repr
         return f"{self.code} - {self.label} ({self.status})"
+
+
+class Prescription(models.Model):
+    """Représente une prescription"""
+
+    STATUS_VALIDE = "valide"
+    STATUS_EN_ATTENTE = "en_attente"
+    STATUS_SUPPR = "suppr"
+    STATUS_CHOICES = (
+        (STATUS_VALIDE, "valide"),
+        (STATUS_SUPPR, "suppr"),
+        (STATUS_EN_ATTENTE, "en_attente"),
+    )
+
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, null=False)
+    medication = models.ForeignKey(Medication, on_delete=models.CASCADE, null=False)
+    status = models.CharField(
+        max_length=10, choices=STATUS_CHOICES, default=STATUS_VALIDE
+    )
+    begin_date = models.DateField(null=False)
+    end_date = models.DateField(null=False)
+    comment = models.CharField(max_length=1000, null=False, blank=True)
