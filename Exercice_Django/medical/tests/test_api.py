@@ -1,12 +1,109 @@
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework.test import APIClient
+from random import randint
 
 from medical.models import Patient, Medication, Prescription
 
 # FIXME All tests that `assertGreaterEqual` should be `assertEqual` because
 # the test db is expected to be empty when firing each test class. If not,
 # fix that first.
+
+
+class ApiRetrieveTests(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+
+    def test_get_patient_missing(self):
+
+        url = reverse("patient-detail", args=(randint(0, 1000),))
+        r = self.client.get(url)
+        self.assertEqual(r.status_code, 404)
+        self.assertEqual(r.json(), {"detail": "No Patient matches the given query."})
+
+    def test_get_patient_exists(self):
+        patient = Patient.objects.create(
+            last_name="Martin", first_name="Jeanne", birth_date="1992-03-10"
+        )
+
+        url = reverse("patient-detail", args=(patient.id,))
+        r = self.client.get(url)
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(
+            r.json(),
+            {
+                "id": 1,
+                "last_name": "Martin",
+                "first_name": "Jeanne",
+                "birth_date": "1992-03-10",
+            },
+        )
+
+    def test_get_medication_missing(self):
+
+        url = reverse("medication-detail", args=(randint(0, 1000),))
+        r = self.client.get(url)
+        self.assertEqual(r.status_code, 404)
+        self.assertEqual(r.json(), {"detail": "No Medication matches the given query."})
+
+    def test_get_medication_exists(self):
+        medication = paracétamol = Medication.objects.create(
+            code="PARA500", label="Paracétamol 500mg", status=Medication.STATUS_ACTIF
+        )
+        url = reverse("medication-detail", args=(medication.id,))
+        r = self.client.get(url)
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(
+            r.json(),
+            {
+                "id": 1,
+                "code": "PARA500",
+                "label": "Paracétamol 500mg",
+                "status": "actif",
+            },
+        )
+
+    def test_get_prescription_missing(self):
+
+        url = reverse("prescription-detail", args=(randint(0, 1000),))
+        r = self.client.get(url)
+        self.assertEqual(r.status_code, 404)
+        self.assertEqual(
+            r.json(), {"detail": "No Prescription matches the given query."}
+        )
+
+    def test_get_prescription_exists(self):
+
+        jeanne = Patient.objects.create(
+            last_name="Martin", first_name="Jeanne", birth_date="1992-03-10"
+        )
+        paracétamol = Medication.objects.create(
+            code="PARA500", label="Paracétamol 500mg", status=Medication.STATUS_ACTIF
+        )
+        prescription = Prescription.objects.create(
+            patient=jeanne,
+            medication=paracétamol,
+            status=Prescription.STATUS_VALIDE,
+            begin_date="2020-01-01",
+            end_date="2022-12-31",
+            comment="hypocondrie",
+        )
+
+        url = reverse("prescription-detail", args=(prescription.id,))
+        r = self.client.get(url)
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(
+            r.json(),
+            {
+                "id": 1,
+                "patient": 1,
+                "medication": 1,
+                "status": "valide",
+                "begin_date": "2020-01-01",
+                "end_date": "2022-12-31",
+                "comment": "hypocondrie",
+            },
+        )
 
 
 class ApiListTests(TestCase):
