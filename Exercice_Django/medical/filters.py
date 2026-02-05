@@ -1,6 +1,6 @@
 import django_filters
 
-from .models import Patient, Medication
+from .models import Patient, Medication, Prescription
 
 
 class PatientFilter(django_filters.FilterSet):
@@ -33,4 +33,30 @@ class MedicationFilter(django_filters.FilterSet):
 
     class Meta:
         model = Medication
+        fields = []
+
+
+# TODO We should handle accented-letter-agnostic search to ease UX
+# PM is aware: see ticket COHORT360-123456.
+class PrescriptionFilter(django_filters.FilterSet):
+    status = django_filters.CharFilter(field_name="status", lookup_expr="exact")
+    medication_code = django_filters.CharFilter(
+        field_name="medication__code", lookup_expr="startswith"
+    )
+    medication_label = django_filters.CharFilter(
+        field_name="medication__label", lookup_expr="icontains"
+    )
+    patient_firstname = django_filters.CharFilter(
+        field_name="patient__first_name", lookup_expr="icontains"
+    )
+    patient_lastname = django_filters.CharFilter(
+        field_name="patient__last_name", lookup_expr="icontains"
+    )
+    begin_date = django_filters.DateFromToRangeFilter(field_name="begin_date")
+    begin_date_on = django_filters.DateFilter(field_name="begin_date")
+    end_date = django_filters.DateFromToRangeFilter(field_name="end_date")
+    end_date_on = django_filters.DateFilter(field_name="end_date")
+
+    class Meta:
+        model = Prescription
         fields = []
