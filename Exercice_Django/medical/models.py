@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.exceptions import ValidationError
 
 
 class Patient(models.Model):
@@ -61,3 +62,10 @@ class Prescription(models.Model):
     begin_date = models.DateField(null=False)
     end_date = models.DateField(null=False)
     comment = models.CharField(max_length=1000, null=False, blank=True)
+
+    def save(self, *args, **kwargs):
+
+        if self.begin_date > self.end_date:
+            raise ValidationError(message="unordered prescription dates")
+
+        return super().save(*args, **kwargs)
