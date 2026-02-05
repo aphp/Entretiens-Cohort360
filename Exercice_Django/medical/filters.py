@@ -33,4 +33,4 @@ class MedicationFilter(django_filters.FilterSet):
 
     class Meta:
         model = Medication
-        fields = ["code", "label", "status"]
+        fields = []
