@@ -181,14 +181,14 @@ class Command(BaseCommand):
             "David",
         ]
 
-        created_patients = []
-        for _ in range(n_patients):
-            p = Patient.objects.create(
+        created_patients = Patient.objects.bulk_create(
+            Patient(
                 last_name=random.choice(last_names),
                 first_name=random.choice(first_names),
                 birth_date=random_date(),
             )
-            created_patients.append(p)
+            for _ in range(n_patients)
+        )
 
         base_labels = [
             "Paracetamol",
@@ -242,7 +242,7 @@ class Command(BaseCommand):
             "Promethazine",
             "Meclizine",
         ]
-        created_meds = []
+        medications_to_create = []
         for _ in range(n_meds):
             code = f"MED{random.randint(1000, 9999)}{random.choice(string.ascii_uppercase)}"
             label = (
@@ -252,24 +252,30 @@ class Command(BaseCommand):
             status = random.choices(
                 [Medication.STATUS_ACTIF, Medication.STATUS_SUPPR], weights=[0.8, 0.2]
             )[0]
-            m = Medication.objects.create(code=code, label=label, status=status)
-            created_meds.append(m)
+            medications_to_create.append(
+                Medication(code=code, label=label, status=status)
+            )
+        created_meds = Medication.objects.bulk_create(medications_to_create)
 
-        created_prescriptions = []
+        prescriptions_to_create = []
         end_of_current_year = date(year=date.today().year, month=12, day=31)
         for _ in range(n_prescriptions):
             patient = random.choice(created_patients)
             prescription_begins, prescription_ends = random_interval_between(
                 patient.birth_date, end_of_current_year
             )
-            p = Prescription.objects.create(
-                patient=patient,
-                medication=random.choice(created_meds),
-                status=random.choice([k for k, _ in Prescription.STATUS_CHOICES]),
-                begin_date=prescription_begins,
-                end_date=prescription_ends,
+            prescriptions_to_create.append(
+                Prescription(
+                    patient=patient,
+                    medication=random.choice(created_meds),
+                    status=random.choice([k for k, _ in Prescription.STATUS_CHOICES]),
+                    begin_date=prescription_begins,
+                    end_date=prescription_ends,
+                )
             )
-            created_prescriptions.append(p)
+        created_prescriptions = Prescription.objects.bulk_create(
+            prescriptions_to_create
+        )
 
         self.stdout.write(
             self.style.SUCCESS(
