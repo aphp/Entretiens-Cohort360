@@ -2,7 +2,7 @@ import random
 import string
 from datetime import date, timedelta
 
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 
 from medical.models import Patient, Medication, Prescription
 
@@ -26,10 +26,6 @@ def random_interval_between(not_before_date, not_after_date):
 
 class Command(BaseCommand):
     # TODO when the running env is handled, disable this command when env==production
-    # TODO move those `delete()` into `handle()` to avoid clearing data if validation fails
-    Patient.objects.all().delete()
-    Medication.objects.all().delete()
-    Prescription.objects.all().delete()
 
     help = "Seed the database with demo Patients, Medications and Prescriptions"
 
@@ -38,12 +34,27 @@ class Command(BaseCommand):
         parser.add_argument("--medications", type=int, default=5)
         parser.add_argument("--prescriptions", type=int, default=30)
 
+    def _validate_inputs(self, n_patients, n_meds, n_prescriptions):
+        if n_prescriptions > 0 and n_patients == 0 and not Patient.objects.exists():
+            raise CommandError(
+                "Prescriptions cannot be created if there is no available Patient."
+            )
+
+        if n_prescriptions > 0 and n_meds == 0 and not Medication.objects.exists():
+            raise CommandError(
+                "Prescriptions cannot be created if there is no available Medication."
+            )
+
     def handle(self, *args, **options):
         n_patients = options["patients"]
         n_meds = options["medications"]
         n_prescriptions = options["prescriptions"]
-        # TODO validation for prescription count != 0 and no patient or no medication
-        # TODO use Django's batch creation
+
+        self._validate_inputs(n_patients, n_meds, n_prescriptions)
+
+        Patient.objects.all().delete()
+        Medication.objects.all().delete()
+        Prescription.objects.all().delete()
 
         last_names = [
             "Martin",
