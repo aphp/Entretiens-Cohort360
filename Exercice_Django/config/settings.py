@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     # Third-party
     "rest_framework",
     "django_filters",
+    "corsheaders",
     # Local apps
     "medical",
 ]
@@ -33,6 +34,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -109,3 +111,7 @@ REST_FRAMEWORK = {
         "rest_framework.filters.SearchFilter",
     ],
 }
+
+# FIXME This is a secutiry hole. Allow this only for developement.
+# See https://github.com/adamchainz/django-cors-headers#cors_allow_all_origins-bool
+CORS_ALLOW_ALL_ORIGINS = True
