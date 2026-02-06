@@ -280,6 +280,13 @@ class Command(BaseCommand):
             )
         created_meds = Medication.objects.bulk_create(medications_to_create)
 
+        dummy_prescription_comments = [
+            "",
+            "Risque d'allergie",
+            "Toutes les 4 heures",
+            "Jamais à jeun",
+            "Expérimental",
+        ]
         prescriptions_to_create = []
         end_of_current_year = date(year=date.today().year, month=12, day=31)
         for _ in range(n_prescriptions):
@@ -294,6 +301,7 @@ class Command(BaseCommand):
                     status=random.choice([k for k, _ in Prescription.STATUS_CHOICES]),
                     begin_date=prescription_begins,
                     end_date=prescription_ends,
+                    comment=random.choice(dummy_prescription_comments),
                 )
             )
         created_prescriptions = Prescription.objects.bulk_create(
