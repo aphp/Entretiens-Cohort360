@@ -191,13 +191,13 @@ class ApiListTests(TestCase):
         self.client = APIClient()
 
         # Patients
-        jeanne = Patient.objects.create(
+        self.jeanne = Patient.objects.create(
             last_name="Martin", first_name="Jeanne", birth_date="1992-03-10"
         )
-        jean = Patient.objects.create(
+        self.jean = Patient.objects.create(
             last_name="Durand", first_name="Jean", birth_date="1980-05-20"
         )
-        bernard = Patient.objects.create(last_name="Bernard", first_name="Paul")
+        self.bernard = Patient.objects.create(last_name="Bernard", first_name="Paul")
 
         # Medications
         paracétamol = Medication.objects.create(
@@ -209,7 +209,7 @@ class ApiListTests(TestCase):
 
         # Prescriptions
         Prescription.objects.create(
-            patient=jeanne,
+            patient=self.jeanne,
             medication=paracétamol,
             status=Prescription.STATUS_VALIDE,
             begin_date="2020-01-01",
@@ -217,7 +217,7 @@ class ApiListTests(TestCase):
             comment="hypocondrie",
         )
         Prescription.objects.create(
-            patient=jean,
+            patient=self.jean,
             medication=ibuprofène,
             status=Prescription.STATUS_EN_ATTENTE,
             begin_date="2024-01-01",
@@ -225,11 +225,35 @@ class ApiListTests(TestCase):
             comment="migraine",
         )
 
-    def test_patient_list(self):
+    def test_patient_list_all(self):
         url = reverse("patient-list")
         r = self.client.get(url)
         self.assertEqual(r.status_code, 200)
         self.assertGreaterEqual(len(r.json()), 3)
+
+    def test_patient_filter_by_id_simple(self):
+        url = reverse("patient-list")
+        r = self.client.get(url, {"id": self.bernard.id})
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(len(r.json()), 1)
+
+    def test_patient_filter_by_id_and_remove_non_id(self):
+        url = reverse("patient-list")
+        r = self.client.get(url, {"id": f"a,{self.bernard.id}"})
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(len(r.json()), 1)
+
+    def test_patient_filter_by_id_and_remove_whitespaces(self):
+        url = reverse("patient-list")
+        r = self.client.get(url, {"id": f"  {self.bernard.id}\t"})
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(len(r.json()), 1)
+
+    def test_patient_filter_by_ids(self):
+        url = reverse("patient-list")
+        r = self.client.get(url, {"id": f"{self.bernard.id},{self.jeanne.id}"})
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(len(r.json()), 2)
 
     def test_patient_filter_nom(self):
         url = reverse("patient-list")
