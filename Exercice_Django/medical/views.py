@@ -29,10 +29,10 @@ class PrescriptionViewSet(
     mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
-    #    mixins.UpdateModelMixin,
+    mixins.UpdateModelMixin,
     viewsets.GenericViewSet,
 ):
-    """Creation et lecture des prescriptions avec filtrage via query params."""
+    """Creation et mise à jour des prescriptions ; lecture avec filtrage via query params."""
 
     serializer_class = PrescriptionSerializer
     queryset = Prescription.objects.all()
@@ -40,6 +40,12 @@ class PrescriptionViewSet(
     filterset_class = PrescriptionFilter
 
     def perform_create(self, serializer):
+        try:
+            serializer.save()
+        except ValidationError as e:
+            raise exceptions.ValidationError(e.message)
+
+    def perform_update(self, serializer):
         try:
             serializer.save()
         except ValidationError as e:

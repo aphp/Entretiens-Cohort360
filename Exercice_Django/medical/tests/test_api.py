@@ -148,8 +148,7 @@ class ApiCreateTests(TestCase):
             },
         )
         self.assertEqual(r.status_code, 400)
-        reponse_content = r.json()
-        self.assertIn("patient", reponse_content)
+        self.assertIn("patient", r.json())
 
     def test_create_unknown_medication(self):
         url = reverse("prescription-list")
@@ -165,8 +164,7 @@ class ApiCreateTests(TestCase):
             },
         )
         self.assertEqual(r.status_code, 400)
-        reponse_content = r.json()
-        self.assertIn("medication", reponse_content)
+        self.assertIn("medication", r.json())
 
     def test_create_out_of_order_dates(self):
         url = reverse("prescription-list")
@@ -182,8 +180,291 @@ class ApiCreateTests(TestCase):
             },
         )
         self.assertEqual(r.status_code, 400)
-        reponse_content = r.json()
-        self.assertIn("unordered prescription dates", reponse_content)
+        self.assertIn("unordered prescription dates", r.json())
+
+
+class ApiCompleteUpdateTests(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+
+        self.jeanne = Patient.objects.create(
+            last_name="Martin", first_name="Jeanne", birth_date="1992-03-10"
+        )
+
+        self.bernard = Patient.objects.create(last_name="Bernard", first_name="Paul")
+
+        self.paracétamol = Medication.objects.create(
+            code="PARA500", label="Paracétamol 500mg", status=Medication.STATUS_ACTIF
+        )
+
+        self.ibuprofène = Medication.objects.create(
+            code="IBU200", label="Ibuprofène 200mg", status=Medication.STATUS_SUPPR
+        )
+
+    def test_put_prescription_missing(self):
+
+        url = reverse("prescription-detail", args=(randint(0, 1000),))
+        r = self.client.put(url, {})
+        self.assertEqual(r.status_code, 404)
+        self.assertEqual(
+            r.json(), {"detail": "No Prescription matches the given query."}
+        )
+
+    def test_put_prescription_ok(self):
+        prescription = Prescription.objects.create(
+            patient=self.jeanne,
+            medication=self.ibuprofène,
+            status=Prescription.STATUS_VALIDE,
+            begin_date="2020-01-01",
+            end_date="2022-12-31",
+            comment="hypocondrie",
+        )
+        url = reverse("prescription-detail", args=(prescription.id,))
+        r = self.client.put(
+            url,
+            {
+                "id": 1,
+                "patient": self.bernard.id,
+                "medication": self.paracétamol.id,
+                "status": "en_attente",
+                "begin_date": "2018-01-01",
+                "end_date": "2019-12-31",
+                "comment": "blabla",
+            },
+        )
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(
+            r.json(),
+            {
+                "id": 1,
+                "patient": self.bernard.id,
+                "medication": self.paracétamol.id,
+                "status": "en_attente",
+                "begin_date": "2018-01-01",
+                "end_date": "2019-12-31",
+                "comment": "blabla",
+            },
+        )
+
+
+class ApiPartialUpdateTests(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+
+        self.jeanne = Patient.objects.create(
+            last_name="Martin", first_name="Jeanne", birth_date="1992-03-10"
+        )
+
+        self.bernard = Patient.objects.create(last_name="Bernard", first_name="Paul")
+
+        self.paracétamol = Medication.objects.create(
+            code="PARA500", label="Paracétamol 500mg", status=Medication.STATUS_ACTIF
+        )
+
+        self.ibuprofène = Medication.objects.create(
+            code="IBU200", label="Ibuprofène 200mg", status=Medication.STATUS_SUPPR
+        )
+
+    def test_patch_prescription_missing(self):
+
+        url = reverse("prescription-detail", args=(randint(0, 1000),))
+        r = self.client.patch(url, {})
+        self.assertEqual(r.status_code, 404)
+        self.assertEqual(
+            r.json(), {"detail": "No Prescription matches the given query."}
+        )
+
+    def test_patch_prescription_comment_update(self):
+        prescription = Prescription.objects.create(
+            patient=self.jeanne,
+            medication=self.ibuprofène,
+            status=Prescription.STATUS_VALIDE,
+            begin_date="2020-01-01",
+            end_date="2022-12-31",
+            comment="hypocondrie",
+        )
+        url = reverse("prescription-detail", args=(prescription.id,))
+        r = self.client.patch(url, {"comment": "blabla"})
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(
+            r.json(),
+            {
+                "id": 1,
+                "patient": 1,
+                "medication": 2,
+                "status": "valide",
+                "begin_date": "2020-01-01",
+                "end_date": "2022-12-31",
+                "comment": "blabla",
+            },
+        )
+
+    def test_patch_prescription_existing_patient_update(self):
+        prescription = Prescription.objects.create(
+            patient=self.jeanne,
+            medication=self.ibuprofène,
+            status=Prescription.STATUS_VALIDE,
+            begin_date="2020-01-01",
+            end_date="2022-12-31",
+            comment="hypocondrie",
+        )
+        url = reverse("prescription-detail", args=(prescription.id,))
+        r = self.client.patch(url, {"patient": self.bernard.id})
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(
+            r.json(),
+            {
+                "id": 1,
+                "patient": 2,
+                "medication": 2,
+                "status": "valide",
+                "begin_date": "2020-01-01",
+                "end_date": "2022-12-31",
+                "comment": "hypocondrie",
+            },
+        )
+
+    def test_patch_prescription_missing_patient_update(self):
+        prescription = Prescription.objects.create(
+            patient=self.jeanne,
+            medication=self.ibuprofène,
+            status=Prescription.STATUS_VALIDE,
+            begin_date="2020-01-01",
+            end_date="2022-12-31",
+            comment="hypocondrie",
+        )
+        url = reverse("prescription-detail", args=(prescription.id,))
+        r = self.client.patch(url, {"patient": randint(0, 1000)})
+        self.assertEqual(r.status_code, 400)
+        self.assertIn("patient", r.json())
+
+    def test_patch_prescription_existing_medication_update(self):
+        prescription = Prescription.objects.create(
+            patient=self.jeanne,
+            medication=self.ibuprofène,
+            status=Prescription.STATUS_VALIDE,
+            begin_date="2020-01-01",
+            end_date="2022-12-31",
+            comment="hypocondrie",
+        )
+        url = reverse("prescription-detail", args=(prescription.id,))
+        r = self.client.patch(url, {"medication": self.paracétamol.id})
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(
+            r.json(),
+            {
+                "id": 1,
+                "patient": 1,
+                "medication": 1,
+                "status": "valide",
+                "begin_date": "2020-01-01",
+                "end_date": "2022-12-31",
+                "comment": "hypocondrie",
+            },
+        )
+
+    def test_patch_prescription_missing_medication_update(self):
+        prescription = Prescription.objects.create(
+            patient=self.jeanne,
+            medication=self.ibuprofène,
+            status=Prescription.STATUS_VALIDE,
+            begin_date="2020-01-01",
+            end_date="2022-12-31",
+            comment="hypocondrie",
+        )
+        url = reverse("prescription-detail", args=(prescription.id,))
+        r = self.client.patch(url, {"medication": randint(0, 1000)})
+        self.assertEqual(r.status_code, 400)
+        self.assertIn("medication", r.json())
+
+    def test_patch_prescription_begindate_update(self):
+        prescription = Prescription.objects.create(
+            patient=self.jeanne,
+            medication=self.ibuprofène,
+            status=Prescription.STATUS_VALIDE,
+            begin_date="2020-01-01",
+            end_date="2022-12-31",
+            comment="hypocondrie",
+        )
+        url = reverse("prescription-detail", args=(prescription.id,))
+        r = self.client.patch(url, {"begin_date": "2020-01-02"})
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(
+            r.json(),
+            {
+                "id": 1,
+                "patient": 1,
+                "medication": 2,
+                "status": "valide",
+                "begin_date": "2020-01-02",
+                "end_date": "2022-12-31",
+                "comment": "hypocondrie",
+            },
+        )
+
+    def test_patch_prescription_enddate_update(self):
+        prescription = Prescription.objects.create(
+            patient=self.jeanne,
+            medication=self.ibuprofène,
+            status=Prescription.STATUS_VALIDE,
+            begin_date="2020-01-01",
+            end_date="2022-12-31",
+            comment="hypocondrie",
+        )
+        url = reverse("prescription-detail", args=(prescription.id,))
+        r = self.client.patch(url, {"end_date": "2023-01-22"})
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(
+            r.json(),
+            {
+                "id": 1,
+                "patient": 1,
+                "medication": 2,
+                "status": "valide",
+                "begin_date": "2020-01-01",
+                "end_date": "2023-01-22",
+                "comment": "hypocondrie",
+            },
+        )
+
+    def test_patch_prescription_out_of_order_dates(self):
+        prescription = Prescription.objects.create(
+            patient=self.jeanne,
+            medication=self.ibuprofène,
+            status=Prescription.STATUS_VALIDE,
+            begin_date="2020-01-01",
+            end_date="2022-12-31",
+            comment="hypocondrie",
+        )
+        url = reverse("prescription-detail", args=(prescription.id,))
+        r = self.client.patch(url, {"end_date": "1956-01-22"})
+        self.assertEqual(r.status_code, 400)
+        self.assertIn("unordered prescription dates", r.json())
+
+    def test_patch_prescription_status_update(self):
+        prescription = Prescription.objects.create(
+            patient=self.jeanne,
+            medication=self.ibuprofène,
+            status=Prescription.STATUS_VALIDE,
+            begin_date="2020-01-01",
+            end_date="2022-12-31",
+            comment="hypocondrie",
+        )
+        url = reverse("prescription-detail", args=(prescription.id,))
+        r = self.client.patch(url, {"status": "en_attente"})
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(
+            r.json(),
+            {
+                "id": 1,
+                "patient": 1,
+                "medication": 2,
+                "status": "en_attente",
+                "begin_date": "2020-01-01",
+                "end_date": "2022-12-31",
+                "comment": "hypocondrie",
+            },
+        )
 
 
 class ApiListTests(TestCase):
