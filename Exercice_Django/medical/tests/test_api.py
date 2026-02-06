@@ -106,6 +106,86 @@ class ApiRetrieveTests(TestCase):
         )
 
 
+class ApiCreateTests(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+
+        self.jeanne = Patient.objects.create(
+            last_name="Martin", first_name="Jeanne", birth_date="1992-03-10"
+        )
+        self.paracétamol = Medication.objects.create(
+            code="PARA500", label="Paracétamol 500mg", status=Medication.STATUS_ACTIF
+        )
+
+    def test_create_valid(self):
+        url = reverse("prescription-list")
+        r = self.client.post(
+            url,
+            {
+                "patient": self.jeanne.id,
+                "medication": self.paracétamol.id,
+                "status": "valide",
+                "begin_date": "2020-01-01",
+                "end_date": "2022-12-31",
+                "comment": "hypocondrie",
+            },
+        )
+        self.assertEqual(r.status_code, 201)
+        reponse_content = r.json()
+        self.assertTrue(Prescription.objects.filter(id=reponse_content["id"]).exists())
+
+    def test_create_unknown_patient(self):
+        url = reverse("prescription-list")
+        r = self.client.post(
+            url,
+            {
+                "patient": randint(0, 1000),
+                "medication": self.paracétamol.id,
+                "status": "valide",
+                "begin_date": "2020-01-01",
+                "end_date": "2022-12-31",
+                "comment": "hypocondrie",
+            },
+        )
+        self.assertEqual(r.status_code, 400)
+        reponse_content = r.json()
+        self.assertIn("patient", reponse_content)
+
+    def test_create_unknown_medication(self):
+        url = reverse("prescription-list")
+        r = self.client.post(
+            url,
+            {
+                "patient": self.jeanne.id,
+                "medication": randint(0, 1000),
+                "status": "valide",
+                "begin_date": "2020-01-01",
+                "end_date": "2022-12-31",
+                "comment": "hypocondrie",
+            },
+        )
+        self.assertEqual(r.status_code, 400)
+        reponse_content = r.json()
+        self.assertIn("medication", reponse_content)
+
+    def test_create_out_of_order_dates(self):
+        url = reverse("prescription-list")
+        r = self.client.post(
+            url,
+            {
+                "patient": self.jeanne.id,
+                "medication": self.paracétamol.id,
+                "status": "valide",
+                "begin_date": "2020-01-01",
+                "end_date": "1982-12-31",
+                "comment": "hypocondrie",
+            },
+        )
+        self.assertEqual(r.status_code, 400)
+        reponse_content = r.json()
+        self.assertIn("unordered prescription dates", reponse_content)
+
+
 class ApiListTests(TestCase):
     def setUp(self):
         self.client = APIClient()
