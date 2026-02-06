@@ -5,10 +5,6 @@ from random import randint
 
 from medical.models import Patient, Medication, Prescription
 
-# FIXME All tests that `assertGreaterEqual` should be `assertEqual` because
-# the test db is expected to be empty when firing each test class. If not,
-# fix that first.
-
 
 class ApiRetrieveTests(TestCase):
     def setUp(self):
@@ -510,7 +506,7 @@ class ApiListTests(TestCase):
         url = reverse("patient-list")
         r = self.client.get(url)
         self.assertEqual(r.status_code, 200)
-        self.assertGreaterEqual(len(r.json()), 3)
+        self.assertEqual(len(r.json()), 3)
 
     def test_patient_filter_by_id_simple(self):
         url = reverse("patient-list")
@@ -554,7 +550,7 @@ class ApiListTests(TestCase):
         url = reverse("medication-list")
         r = self.client.get(url)
         self.assertEqual(r.status_code, 200)
-        self.assertGreaterEqual(len(r.json()), 2)
+        self.assertEqual(len(r.json()), 2)
 
     def test_medication_filter_status(self):
         url = reverse("medication-list")

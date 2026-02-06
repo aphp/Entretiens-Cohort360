@@ -33,14 +33,32 @@ class Command(BaseCommand):
         parser.add_argument("--patients", type=int, default=10)
         parser.add_argument("--medications", type=int, default=5)
         parser.add_argument("--prescriptions", type=int, default=30)
+        parser.add_argument(
+            "-k",
+            "--keep",
+            default=False,
+            action="store_true",
+            dest="keep_data",
+            help="Keep existing data",
+        )
 
-    def _validate_inputs(self, n_patients, n_meds, n_prescriptions):
-        if n_prescriptions > 0 and n_patients == 0 and not Patient.objects.exists():
+    def _validate_inputs(self, n_patients, n_meds, n_prescriptions, keep_data):
+        if n_prescriptions == 0:
+            # No dependency on other objects; therefore no issue
+            return
+
+        if n_patients == 0 and (
+            (not Patient.objects.exists())
+            or (Patient.objects.exists() and not keep_data)
+        ):
             raise CommandError(
                 "Prescriptions cannot be created if there is no available Patient."
             )
 
-        if n_prescriptions > 0 and n_meds == 0 and not Medication.objects.exists():
+        if n_meds == 0 and (
+            (not Medication.objects.exists())
+            or (Medication.objects.exists() and not keep_data)
+        ):
             raise CommandError(
                 "Prescriptions cannot be created if there is no available Medication."
             )
@@ -49,12 +67,17 @@ class Command(BaseCommand):
         n_patients = options["patients"]
         n_meds = options["medications"]
         n_prescriptions = options["prescriptions"]
+        keep_data = options["keep_data"]
 
-        self._validate_inputs(n_patients, n_meds, n_prescriptions)
+        self._validate_inputs(n_patients, n_meds, n_prescriptions, keep_data)
 
-        Patient.objects.all().delete()
-        Medication.objects.all().delete()
-        Prescription.objects.all().delete()
+        if keep_data:
+            self.stdout.write("Existing data was kept")
+        else:
+            Patient.objects.all().delete()
+            Medication.objects.all().delete()
+            Prescription.objects.all().delete()
+            self.stdout.write(self.style.WARNING("Existing data was deleted"))
 
         last_names = [
             "Martin",

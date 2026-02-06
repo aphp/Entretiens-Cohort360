@@ -10,17 +10,29 @@ from medical.models import Patient, Medication, Prescription
 class PrescriptionModelTestCase(TestCase):
     def _create_patients(self, count=1):
         call_command(
-            "seed_demo", f"--patients={count}", "--medications=0", "--prescriptions=0"
+            "seed_demo",
+            "-k",
+            f"--patients={count}",
+            "--medications=0",
+            "--prescriptions=0",
         )
 
     def _create_medications(self, count=1):
         call_command(
-            "seed_demo", "--patients=0", f"--medications={count}", "--prescriptions=0"
+            "seed_demo",
+            "-k",
+            "--patients=0",
+            f"--medications={count}",
+            "--prescriptions=0",
         )
 
     def _create_prescriptions(self, count=1):
         call_command(
-            "seed_demo", "--patients=0", "--medications=0", f"--prescriptions={count}"
+            "seed_demo",
+            "-k",
+            "--patients=0",
+            "--medications=0",
+            f"--prescriptions={count}",
         )
 
     def test_save__smoke(self):
