@@ -40,6 +40,9 @@ class MedicationFilter(filters.FilterSet):
 # PM is aware: see ticket COHORT360-123456.
 class PrescriptionFilter(filters.FilterSet):
     status = filters.CharFilter(field_name="status", lookup_expr="exact")
+    medication_id = filters.CharFilter(
+        field_name="medication_id", lookup_expr="exact"
+    )
     medication_code = filters.CharFilter(
         field_name="medication__code", lookup_expr="startswith"
     )
