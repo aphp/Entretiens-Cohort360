@@ -1,14 +1,29 @@
+import { medicationStatuses } from "~/ui";
 import type { Route } from "./+types/home";
 
 import { medicationContext } from "~/context";
 
+
 export async function clientLoader({ context }: Route.ClientLoaderArgs) {
-  return await context.get(medicationContext);
+  const medicationMap = await context.get(medicationContext);
+
+  const medicationList = [];
+  for (const m of (medicationMap?.values()) || []) {
+    medicationList.push({
+      "id": m.id,
+      "code": m.code,
+      "label": m.label,
+      "status_as_emoji": medicationStatuses[m.status],
+
+    });
+  }
+  return { medicationList }
 }
 
 
 export default function MedicationList({ loaderData }: Route.ComponentProps) {
 
+  const { medicationList } = loaderData;
   return (
     <main >
       <h1>Les médicaments</h1>
@@ -23,12 +38,12 @@ export default function MedicationList({ loaderData }: Route.ComponentProps) {
           </tr>
         </thead>
         <tbody>
-          {[...loaderData.values()].map(p => {
+          {medicationList.map(p => {
             return (
               <tr key={p.id}>
                 <td>{p.id}</td>
                 <td>{p.code}</td>
-                <td>{p.status}</td>
+                <td>{p.status_as_emoji}</td>
                 <td>{p.label}</td>
               </tr>
             )

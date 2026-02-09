@@ -1,9 +1,9 @@
-import { useEffect } from "react";
 import type { Route } from "./+types/home";
-import { useSearchParams, Form } from "react-router";
+import { useSearchParams } from "react-router";
 import { patientContext, medicationContext } from "~/context";
 import type { Medication, Patient } from "~/types";
 import { fetchPrescriptionList } from "~/backend";
+import { buildMedicationLabel, buildPatientLabel, medicationStatuses, prescriptionStatuses } from "~/ui";
 
 // export async function action({ request }: Route.ActionArgs) {
 //   const formData = await request.formData();
@@ -17,24 +17,6 @@ function extractExistingParams(searchParams: URLSearchParams) {
   return entries.reduce((acc, a) => ((acc[a[0]] = acc[a[0]] || []).push(a[1]), acc), {});
 }
 
-function buildPatientLabel(patient: Patient): string {
-  if (!patient) {
-    return "";
-  }
-  const dob = Date.parse(patient.birth_date as string);
-  const ageInMs = new Date().getTime() - dob;
-  const age = Math.floor(ageInMs / 1000 / 60 / 60 / 24 / 365.25);
-  return `${patient.first_name} ${patient.last_name} ${age} ans`
-}
-
-const medicationStatuses = { "actif": "🟢", "suppr": "🔴" }
-const prescriptionStatuses = { "valide": "🟢", "en_attente": "🟡", "suppr": "🔴" }
-function buildMedicationLabel(medication: Medication): string {
-  if (!medication) {
-    return "";
-  }
-  return `${medicationStatuses[medication.status]} ${medication.label}`
-}
 
 export async function clientLoader({ request, context }: Route.LoaderArgs) {
   const parameters = new URL(request.url).searchParams;
