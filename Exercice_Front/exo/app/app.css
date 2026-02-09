@@ -1,15 +1,26 @@
-@import "tailwindcss";
-
-@theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif,
-    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+table {
+    border-collapse: collapse;
 }
 
-html,
-body {
-  @apply bg-white dark:bg-gray-950;
+tbody>tr:nth-of-type(odd) {
+    background-color: lightgray;
+}
 
-  @media (prefers-color-scheme: dark) {
-    color-scheme: dark;
-  }
+td,
+th {
+    border: 1px solid black;
+    padding: 0.5em;
+}
+fieldset {
+    margin-bottom: 1em;
+}
+fieldset > button  {
+    margin-top: 1em;
+}
+fieldset > label {
+    display:block;
+    padding: 0.2em 1em;
+}
+fieldset > label > input,fieldset >  label > select {
+    margin-left: 2em;
 }

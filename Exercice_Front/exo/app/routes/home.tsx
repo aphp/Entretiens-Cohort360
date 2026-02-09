@@ -1,13 +1,18 @@
 import type { Route } from "./+types/home";
-import { Welcome } from "../welcome/welcome";
+import { NavLink } from "react-router";
 
-export function meta({}: Route.MetaArgs) {
-  return [
-    { title: "Cohort360" },
-    { name: "description", content: "Welcome to Cohort 360 demo app!" },
-  ];
-}
 
-export default function Home() {
-  return <Welcome />;
+export default function Home({ loaderData }: Route.ComponentProps) {
+  return (
+    <main >
+      <h1>Bienvenue</h1>
+      <nav>
+        <ul>
+          <li><NavLink to="/patients">Liste des patients</NavLink></li>
+          <li><NavLink to="/medications">Liste des médicaments</NavLink></li>
+          <li><NavLink to="/prescriptions">Liste des prescriptions</NavLink></li>
+        </ul>
+      </nav>
+    </main>
+  );
 }

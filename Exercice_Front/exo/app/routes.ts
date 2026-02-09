@@ -3,20 +3,21 @@ import { type RouteConfig, index, prefix, route , layout } from "@react-router/d
 export default [
     index("routes/home.tsx"),
     ...prefix("patients", [
-        index("./patients/home.tsx"),
-        layout("./patients/layout.tsx", [
-            route(":pid", "./patients/display.tsx")]),
+        index("./routes/patients/home.tsx"),
+        layout("./routes/patients/layout.tsx", [
+            route(":pid", "./routes/patients/display.tsx")]),
     ]),
     ...prefix("medications", [
-        index("./medications/home.tsx"),
-        layout("./medications/layout.tsx", [
-            route(":pid", "./medications/display.tsx")]),
+        index("./routes/medications/home.tsx"),
+        layout("./routes/medications/layout.tsx", [
+            route(":pid", "./routes/medications/display.tsx")]),
     ]),
     ...prefix("prescriptions", [
-        index("./prescriptions/home.tsx"),
-        layout("./prescriptions/layout.tsx", [
-            route(":pid", "./prescriptions/display.tsx"),
-            route(":pid/edit", "./prescriptions/edit.tsx")]),
+        index("./routes/prescriptions/home.tsx"),
+        route("search", "./routes/prescriptions/search.tsx"),
+        layout("./routes/prescriptions/layout.tsx", [
+            route(":pid", "./routes/prescriptions/display.tsx"),
+            route(":pid/edit", "./routes/prescriptions/edit.tsx")]),
     ]),
 
 ] satisfies RouteConfig;

@@ -6,12 +6,9 @@ import {
   Scripts,
   ScrollRestoration,
 } from "react-router";
-
 import type { Route } from "./+types/root";
 import "./app.css";
-
-export const links: Route.LinksFunction = () => [
-];
+import { medicationListMiddleware, patientListMiddleware } from "./middlewares";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -21,6 +18,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
         <Links />
+        <title>Cohort360</title>
       </head>
       <body>
         {children}
@@ -30,6 +28,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
     </html>
   );
 }
+
+
+export const clientMiddleware: Route.ClientMiddlewareFunction[] =
+  [patientListMiddleware, medicationListMiddleware];
 
 export default function App() {
   return <Outlet />;
