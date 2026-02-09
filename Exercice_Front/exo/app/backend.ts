@@ -23,8 +23,13 @@ export async function fetchPrescriptionList(filter) {
         searchParams.set(key, `${value}`);
     }
 
-    console.debug("Fetching medication list from backend", "baseUrl", baseUrl.toString(), "filter", filter);
+    console.debug("Fetching prescription list from backend", baseUrl.toString());
     const res = await fetch(baseUrl);
     const prescriptions = await res.json() as Prescription[];
     return prescriptions;
+}
+
+export async function createPrescription(data: FormData) {
+    const baseUrl = new URL('http://localhost:8000/Prescription');
+    return await fetch(baseUrl, { method: "POST", body: data });
 }

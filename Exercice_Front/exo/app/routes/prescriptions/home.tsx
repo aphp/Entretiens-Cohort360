@@ -1,15 +1,10 @@
 import type { Route } from "./+types/home";
 import { useSearchParams } from "react-router";
 import { patientContext, medicationContext } from "~/context";
-import type { Medication, Patient } from "~/types";
-import { fetchPrescriptionList } from "~/backend";
-import { buildMedicationLabel, buildPatientLabel, medicationStatuses, prescriptionStatuses } from "~/ui";
+import { createPrescription, fetchPrescriptionList } from "~/backend";
+import { buildMedicationLabel, buildPatientLabel, prescriptionStatuses } from "~/ui";
+import { useState } from "react";
 
-// export async function action({ request }: Route.ActionArgs) {
-//   const formData = await request.formData();
-//   console.debug("in action", "formData", formData);
-//   return { ok: true };
-// }
 
 function extractExistingParams(searchParams: URLSearchParams) {
   // TODO à simplifier
@@ -21,7 +16,6 @@ function extractExistingParams(searchParams: URLSearchParams) {
 export async function clientLoader({ request, context }: Route.LoaderArgs) {
   const parameters = new URL(request.url).searchParams;
   const filter = extractExistingParams(parameters);
-  console.debug("clientLoader", "filter", filter)
 
   const patientMap = await context.get(patientContext);
   const medicationMap = await context.get(medicationContext);
@@ -48,7 +42,13 @@ export async function clientLoader({ request, context }: Route.LoaderArgs) {
     medicationLabelOptions.push([m.id, m.label])
   }
 
-  return { prescriptionList, medicationCodeOptions, medicationLabelOptions }
+  const patientOptions = [];
+  for (const p of (patientMap?.values() || [])) {
+    patientOptions.push([p.id, buildPatientLabel(p)])
+  }
+
+
+  return { prescriptionList, medicationCodeOptions, medicationLabelOptions, patientOptions }
 }
 
 export default function PrescriptionList({
@@ -58,24 +58,21 @@ export default function PrescriptionList({
   matches,
 }: Route.ComponentProps) {
 
-  // console.debug("in home", "actionData", actionData);
-  // console.debug("in home", "params", params);
-
-  const { prescriptionList, medicationCodeOptions, medicationLabelOptions } = loaderData;
+  const { prescriptionList, medicationCodeOptions, medicationLabelOptions, patientOptions } = loaderData;
   const [searchParams, setSearchParams] = useSearchParams()
   const filterStatus = searchParams.get("status") || "";
   const filterPatientLastName = searchParams.get("patient_lastname") || "";
   const filterMedicationLabel = searchParams.get("medication_label") || "";
   const filterMedicationId = searchParams.get("medication_id") || "";
 
-  // useEffect(() => {
-  //   console.debug("in searchP effect", "searchParams", searchParams);
-  // }, [searchParams])
+  const [afterCreateState, setAfterCreateState] = useState<boolean | null>(null);
+  const [afterCreateMessage, setAfterCreateMessage] = useState<string | null>(null);
 
   const onFilter = (event) => {
     event.preventDefault();
     const formData = new FormData(event.target);
-    console.debug("onFilter", "formData", formData);
+    setAfterCreateState(null);
+    setAfterCreateMessage(null);
 
     const newParams = {
       status: formData.get("status") || "",
@@ -85,15 +82,51 @@ export default function PrescriptionList({
     };
     setSearchParams(newParams);
 
-    console.debug("onFilter", "newParams", newParams);
-    console.debug("onFilter", "push history", searchParams.toString());
     history.pushState({}, "", searchParams.toString());
   }
+
+
+
+  const onCreate = (event) => {
+    event.preventDefault();
+    setAfterCreateState(null);
+    setAfterCreateMessage(null);
+    const formData = new FormData(event.target);
+    createPrescription(formData).then(async (response) => {
+
+      if (response.status === 400) {
+        throw await response.json();
+      } else if (!response.ok) {
+        throw new Error(`HTTP error: ${response.status}`);
+      }
+      return await response.json();
+    }).then((responseData) => {
+      setAfterCreateState(true);
+      setAfterCreateMessage(`Prescription créée (id=${responseData.id})`);
+    }).catch((rejectionData) => {
+      let errorMsg;
+      if (Array.isArray(rejectionData)) {
+        errorMsg = rejectionData[0];
+      } else {
+        const parts = [];
+        for (const key in rejectionData) {
+          for (const msg of rejectionData[key]) {
+            parts.push(`${msg} (${key})`)
+          }
+        }
+        errorMsg = parts.join(" ; ");
+      }
+
+      setAfterCreateState(false);
+      setAfterCreateMessage(`Prescription non créée : ${errorMsg}`);
+    })
+  }
+
 
   return (
     <>
       <h1>Les prescriptions</h1>
-      <div>
+      <div className="forms">
         <form onSubmit={onFilter}>
           <fieldset>
             <legend>Filtrage</legend>
@@ -124,11 +157,48 @@ export default function PrescriptionList({
             <button>Filtrer</button>
           </fieldset>
         </form>
+        <form onSubmit={onCreate}>
+          <fieldset>
+            <legend>Création</legend>
+            <label>Patient
+              <select name="patient">
+                {patientOptions
+                  .sort((a, b) => a[1].localeCompare(b[1]))
+                  .map(([id, label]) => (
+                    <option key={id} value={id}>{label}</option>
+                  ))}
+              </select>
+            </label>
+            <label>Code médicament
+              <select name="medication" defaultValue={filterMedicationId}>
+                {medicationCodeOptions
+                  .sort((a, b) => a[1].localeCompare(b[1]))
+                  .map(([id, code]) => (
+                    <option key={id} value={id}>{code}</option>
+                  ))}
+              </select>
+            </label>
+            <label>Période
+              <input type="date" name="begin_date" />
+              <input type="date" name="end_date" />
+            </label>
+            <label>&Eacute;tat
+              <select name="status" defaultValue={filterStatus}>
+                <option value="valide">🟢</option>
+                <option value="en_attente">🟡</option>
+                <option value="suppr">🔴</option>
+              </select>
+            </label>
+            <label>Commentaire
+              <input type="text" name="comment" placeholder="(optionnel)" />
+            </label>
+            <button>Créer</button>
+            {(afterCreateState !== null) && (
+              <span className={afterCreateState ? 'okMessage' : 'errorMessage'}>{afterCreateMessage}</span>
+            )}
+          </fieldset>
+        </form>
       </div>
-      {/* <Form method="post" navigate={false}>
-        <input type="text" name="q" />
-        <button type="submit">Filter</button>
-      </Form> */}
       <table>
         <thead>
           <tr>

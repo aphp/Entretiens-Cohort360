@@ -12,6 +12,10 @@ th {
     padding: 0.5em;
 }
 
+div.forms {
+    display: flex;
+}
+
 fieldset {
     margin-bottom: 1em;
 }
@@ -45,4 +49,20 @@ footer {
 
 main {
     clear: both;
+}
+
+.okMessage {
+    margin-left: 1em;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+    background-color: #00FF0030;
+    border: 1px green solid;
+}
+
+.errorMessage {
+    margin-left: 1em;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+    background-color: #ff000030;
+    border: 1px red solid;
 }
