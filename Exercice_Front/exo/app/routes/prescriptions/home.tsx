@@ -43,12 +43,12 @@ export async function clientLoader({ request, context }: Route.LoaderArgs) {
 
   const medicationCodeOptions = [];
   const medicationLabelOptions = [];
-  for (const m of (medicationMap?.values()|| [])) {
+  for (const m of (medicationMap?.values() || [])) {
     medicationCodeOptions.push([m.id, m.code])
     medicationLabelOptions.push([m.id, m.label])
   }
 
-  return { prescriptionList , medicationCodeOptions, medicationLabelOptions}
+  return { prescriptionList, medicationCodeOptions, medicationLabelOptions }
 }
 
 export default function PrescriptionList({
@@ -106,9 +106,11 @@ export default function PrescriptionList({
             <label>Par code médicament
               <select name="medication_id" defaultValue={filterMedicationId}>
                 <option value="">-</option>
-                {medicationCodeOptions.map(([id, code]) => (
-                  <option value={id}>{code}</option>
-                ))}
+                {medicationCodeOptions
+                  .sort((a, b) => a[1].localeCompare(b[1]))
+                  .map(([id, code]) => (
+                    <option key={id} value={id}>{code}</option>
+                  ))}
               </select>
             </label>
             <label>Par état de prescription
