@@ -2,6 +2,7 @@ import { medicationStatuses } from "~/ui";
 import type { Route } from "./+types/home";
 
 import { medicationContext } from "~/context";
+import { NavLink } from "react-router";
 
 
 export async function clientLoader({ context }: Route.ClientLoaderArgs) {
@@ -35,6 +36,7 @@ export default function MedicationList({ loaderData }: Route.ComponentProps) {
             <th>Code</th>
             <th>&Eacute;tat</th>
             <th>Nom</th>
+            <th>Prescriptions</th>
           </tr>
         </thead>
         <tbody>
@@ -45,6 +47,12 @@ export default function MedicationList({ loaderData }: Route.ComponentProps) {
                 <td>{p.code}</td>
                 <td>{p.status_as_emoji}</td>
                 <td>{p.label}</td>
+                <td>
+                  <NavLink to={{
+                    pathname: "/prescriptions",
+                    search: `?medication_id=${p.id}`,
+                  }}>go</NavLink>
+                </td>
               </tr>
             )
           })}

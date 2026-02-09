@@ -40,7 +40,15 @@ export async function clientLoader({ request, context }: Route.LoaderArgs) {
       "comment": pr.comment
     }
   });
-  return { prescriptionList }
+
+  const medicationCodeOptions = [];
+  const medicationLabelOptions = [];
+  for (const m of (medicationMap?.values()|| [])) {
+    medicationCodeOptions.push([m.id, m.code])
+    medicationLabelOptions.push([m.id, m.label])
+  }
+
+  return { prescriptionList , medicationCodeOptions, medicationLabelOptions}
 }
 
 export default function PrescriptionList({
@@ -53,11 +61,12 @@ export default function PrescriptionList({
   // console.debug("in home", "actionData", actionData);
   // console.debug("in home", "params", params);
 
-  const { prescriptionList } = loaderData;
+  const { prescriptionList, medicationCodeOptions, medicationLabelOptions } = loaderData;
   const [searchParams, setSearchParams] = useSearchParams()
   const filterStatus = searchParams.get("status") || "";
   const filterPatientLastName = searchParams.get("patient_lastname") || "";
   const filterMedicationLabel = searchParams.get("medication_label") || "";
+  const filterMedicationId = searchParams.get("medication_id") || "";
 
   // useEffect(() => {
   //   console.debug("in searchP effect", "searchParams", searchParams);
@@ -71,6 +80,7 @@ export default function PrescriptionList({
     const newParams = {
       status: formData.get("status") || "",
       medication_label: formData.get("medication_label") || "",
+      medication_id: formData.get("medication_id") || "",
       patient_lastname: formData.get("patient_lastname") || ""
     };
     setSearchParams(newParams);
@@ -90,8 +100,16 @@ export default function PrescriptionList({
             <label>Par nom de patient
               <input type="text" name="patient_lastname" defaultValue={filterPatientLastName} />
             </label>
-            <label>Par médicament
+            <label>Par nom de médicament
               <input type="text" name="medication_label" defaultValue={filterMedicationLabel} />
+            </label>
+            <label>Par code médicament
+              <select name="medication_id" defaultValue={filterMedicationId}>
+                <option value="">-</option>
+                {medicationCodeOptions.map(([id, code]) => (
+                  <option value={id}>{code}</option>
+                ))}
+              </select>
             </label>
             <label>Par état de prescription
               <select name="status" defaultValue={filterStatus}>
