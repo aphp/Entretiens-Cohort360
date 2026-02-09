@@ -25,7 +25,7 @@ export default function MedicationList({ loaderData }: Route.ComponentProps) {
 
   const { medicationList } = loaderData;
   return (
-    <main >
+    <>
       <h1>Les médicaments</h1>
       {!loaderData && <div>Loading...</div>}
       {loaderData && <table>
@@ -51,7 +51,7 @@ export default function MedicationList({ loaderData }: Route.ComponentProps) {
         </tbody>
       </table>
       }
-    </main>
+    </>
   );
 }
 

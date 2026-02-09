@@ -11,16 +11,38 @@ th {
     border: 1px solid black;
     padding: 0.5em;
 }
+
 fieldset {
     margin-bottom: 1em;
 }
-fieldset > button  {
+
+fieldset>button {
     margin-top: 1em;
 }
-fieldset > label {
-    display:block;
+
+fieldset>label {
+    display: block;
     padding: 0.2em 1em;
 }
-fieldset > label > input,fieldset >  label > select {
+
+fieldset>label>input,
+fieldset>label>select {
     margin-left: 2em;
+}
+
+header {
+    font-style: italic;
+}
+
+header img {
+    float: left;
+}
+
+footer {
+    text-align: center;
+    margin-top: 2em;
+}
+
+main {
+    clear: both;
 }

@@ -4,7 +4,7 @@ import { NavLink } from "react-router";
 
 export default function Home({ loaderData }: Route.ComponentProps) {
   return (
-    <main >
+    <>
       <h1>Bienvenue</h1>
       <nav>
         <ul>
@@ -13,6 +13,6 @@ export default function Home({ loaderData }: Route.ComponentProps) {
           <li><NavLink to="/prescriptions">Liste des prescriptions</NavLink></li>
         </ul>
       </nav>
-    </main>
+    </>
   );
 }

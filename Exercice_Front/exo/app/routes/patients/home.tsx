@@ -8,7 +8,7 @@ export async function clientLoader({ context }: Route.ClientLoaderArgs) {
 export default function PatientList({ loaderData }: Route.ComponentProps) {
 
   return (
-    <main >
+    <>
       <h1>Les patients</h1>
       {!loaderData && <div>Loading...</div>}
       {loaderData && <table>
@@ -34,7 +34,7 @@ export default function PatientList({ loaderData }: Route.ComponentProps) {
         </tbody>
       </table>
       }
-    </main>
+    </>
   );
 }
 

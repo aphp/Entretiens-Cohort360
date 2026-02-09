@@ -81,7 +81,7 @@ export default function PrescriptionList({
   }
 
   return (
-    <main >
+    <>
       <h1>Les prescriptions</h1>
       <div>
         <form onSubmit={onFilter}>
@@ -141,7 +141,7 @@ export default function PrescriptionList({
           }
         </tbody>
       </table>
-    </main>
+    </>
   );
 }
 
