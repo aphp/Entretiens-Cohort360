@@ -1,21 +1,25 @@
 import type { Medication, Patient, Prescription } from "./types";
 
+// TODO Move this parameter into the central configuration file
+// and make it depend on the deployment environment.
+const baseBackendUrl = "http://localhost:8000";
+
 export async function fetchPatientList() {
     console.debug("Fetching patient list from backend")
-    const res = await fetch(`http://localhost:8000/Patient`);
+    const res = await fetch(`${baseBackendUrl}/Patient`);
     const patients = await res.json() as Patient[];
     return patients;
 }
 
 export async function fetchMedicationList() {
     console.debug("Fetching medication list from backend")
-    const res = await fetch(`http://localhost:8000/Medication`);
+    const res = await fetch(`${baseBackendUrl}/Medication`);
     const patients = await res.json() as Medication[];
     return patients;
 }
 
 export async function fetchPrescriptionList(filter) {
-    const baseUrl = new URL('http://localhost:8000/Prescription');
+    const baseUrl = new URL(`${baseBackendUrl}/Prescription`);
     const searchParams = baseUrl.searchParams;
 
 
@@ -30,6 +34,6 @@ export async function fetchPrescriptionList(filter) {
 }
 
 export async function createPrescription(data: FormData) {
-    const baseUrl = new URL('http://localhost:8000/Prescription');
+    const baseUrl = new URL(`${baseBackendUrl}/Prescription`);
     return await fetch(baseUrl, { method: "POST", body: data });
 }
