@@ -1,5 +1,5 @@
 import type { Route } from "./+types/home";
-import { useSearchParams } from "react-router";
+import { useRevalidator, useSearchParams } from "react-router";
 import { patientContext, medicationContext } from "~/context";
 import { createPrescription, fetchPrescriptionList } from "~/backend";
 import { buildMedicationLabel, buildPatientLabel, prescriptionStatuses } from "~/ui";
@@ -47,7 +47,6 @@ export async function clientLoader({ request, context }: Route.LoaderArgs) {
     patientOptions.push([p.id, buildPatientLabel(p)])
   }
 
-
   return { prescriptionList, medicationCodeOptions, medicationLabelOptions, patientOptions }
 }
 
@@ -67,6 +66,7 @@ export default function PrescriptionList({
 
   const [afterCreateState, setAfterCreateState] = useState<boolean | null>(null);
   const [afterCreateMessage, setAfterCreateMessage] = useState<string | null>(null);
+  const revalidator = useRevalidator();
 
   const onFilter = (event) => {
     event.preventDefault();
@@ -103,6 +103,7 @@ export default function PrescriptionList({
     }).then((responseData) => {
       setAfterCreateState(true);
       setAfterCreateMessage(`Prescription créée (id=${responseData.id})`);
+      revalidator.revalidate();
     }).catch((rejectionData) => {
       let errorMsg;
       if (Array.isArray(rejectionData)) {
