@@ -1,8 +1,6 @@
-import type { Route } from "./+types/home";
 import { NavLink } from "react-router";
 
-
-export default function Home({ loaderData }: Route.ComponentProps) {
+export default function Home() {
   return (
     <>
       <h1>Bienvenue</h1>
