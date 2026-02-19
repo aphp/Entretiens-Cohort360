@@ -1,9 +1,16 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
+from rest_framework.mixins import (
+    CreateModelMixin,
+    ListModelMixin,
+    RetrieveModelMixin,
+    UpdateModelMixin,
+)
+from rest_framework.viewsets import GenericViewSet
 
-from .models import Patient, Medication
-from .filters import PatientFilter, MedicationFilter
-from .serializers import PatientSerializer, MedicationSerializer
+from .models import Patient, Medication, MedicationRequest
+from .filters import PatientFilter, MedicationFilter, MedicationRequestFilter
+from .serializers import PatientSerializer, MedicationSerializer, MedicationRequestSerializer
 
 
 class PatientViewSet(viewsets.ReadOnlyModelViewSet):
@@ -22,3 +29,18 @@ class MedicationViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Medication.objects.all()
     filter_backends = [DjangoFilterBackend]
     filterset_class = MedicationFilter
+
+
+class MedicationRequestViewSet(
+    ListModelMixin,
+    RetrieveModelMixin,
+    CreateModelMixin,
+    UpdateModelMixin,
+    GenericViewSet,
+):
+    """FHIR R4 MedicationRequest — lecture, création et mise à jour."""
+
+    serializer_class = MedicationRequestSerializer
+    queryset = MedicationRequest.objects.select_related("subject", "medication_reference").all()
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = MedicationRequestFilter
