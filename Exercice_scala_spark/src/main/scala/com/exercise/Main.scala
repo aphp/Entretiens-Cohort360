@@ -9,9 +9,17 @@ import org.apache.spark.sql.SparkSession
 
 object Main extends LazyLogging {
   private val dotenv = Dotenv.configure().ignoreIfMissing().load()
-  val criteriaPath: String = dotenv.get("CRITERIA_PATH")
-  val solrUrl: String = dotenv.get("SOLR_URL")
-  val solrZkHost: String = dotenv.get("SOLR_ZK_HOST")
+  val criteriaPath: String =
+  Option(dotenv.get("CRITERIA_PATH"))
+    .getOrElse("src/main/resources/query.json")
+
+val solrUrl: String =
+  Option(dotenv.get("SOLR_URL"))
+    .getOrElse("http://localhost:8983/solr")
+
+val solrZkHost: String =
+  Option(dotenv.get("SOLR_ZK_HOST"))
+    .getOrElse("localhost:9983")
 
   def main(args: Array[String]): Unit = {
 

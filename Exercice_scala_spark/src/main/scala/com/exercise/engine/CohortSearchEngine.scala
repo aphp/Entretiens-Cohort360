@@ -6,37 +6,36 @@ import com.typesafe.scalalogging.LazyLogging
 import org.apache.spark.sql.{Dataset, SparkSession}
 import org.apache.spark.sql.functions._
 
-class CohortSearchEngine(spark: SparkSession, solrConf: SolrConf)
-    extends LazyLogging {
+class CohortSearchEngine(
+    spark: SparkSession,
+    solrConf: SolrConf
+) extends LazyLogging {
 
   private val connector = new SolrConnector(spark, solrConf)
 
   def runSearch(criteria: SearchCriteria): Long = {
 
     logger.info("Starting cohort search")
-
     import spark.implicits._
 
-    // 1️⃣ Charger tous les patients
-    val basePatients =
+    // 1️⃣ Charger tous les patients de base
+    val basePatients: Dataset[String] =
       connector
         .loadCollection("patientAphp")
         .select("id")
         .distinct()
         .as[String]
 
-    // 2️⃣ Appliquer dynamiquement les critères
+    // 2️⃣ Appliquer dynamiquement tous les critères
     val afterCriteria =
       criteria.Criteria.foldLeft(basePatients) { (currentSet, criterion) =>
 
         val collection = mapResourceToCollection(criterion.Resource)
-
         val solrFilters = buildSolrFilters(criterion.searchParams)
 
-        val df =
-          connector.loadCollection(collection, solrFilters)
+        val df = connector.loadCollection(collection, solrFilters)
 
-        val patientIds =
+        val patientIds: Dataset[String] =
           if (criterion.Resource == "Patient") {
             df.select("id").distinct().as[String]
           } else {
@@ -58,7 +57,7 @@ class CohortSearchEngine(spark: SparkSession, solrConf: SolrConf)
           currentSet.except(patientIds)
       }
 
-    // 3️⃣ Appliquer Perimeter
+    // 3️⃣ Appliquer les Perimeters
     val finalSet =
       if (criteria.Perimeters.nonEmpty)
         applyPerimeter(afterCriteria, criteria.Perimeters)
@@ -67,14 +66,13 @@ class CohortSearchEngine(spark: SparkSession, solrConf: SolrConf)
     val result = finalSet.distinct().count()
 
     logger.info(s"Cohort result: $result patients")
-
     result
   }
 
-  // -------------------------
-  // Resource → Collection
-  // -------------------------
-  private def mapResourceToCollection(resource: String): String = {
+  // -------------------------------------------------
+  // Mapping Resource → Collection Solr
+  // -------------------------------------------------
+  private def mapResourceToCollection(resource: String): String =
     resource match {
       case "Patient"           => "patientAphp"
       case "Encounter"         => "encounterAphp"
@@ -85,32 +83,62 @@ class CohortSearchEngine(spark: SparkSession, solrConf: SolrConf)
           s"Unknown resource: $other"
         )
     }
-  }
 
-  // -------------------------
-  // Traduction searchParams → filtres Solr
-  // -------------------------
+  // -------------------------------------------------
+  // Traduction FHIR searchParams → filtres Solr
+  // -------------------------------------------------
   private def buildSolrFilters(params: String): Seq[String] = {
 
-    params.split("&").toSeq.map { param =>
-      val Array(field, value) = param.split("=")
+    if (params == null || params.trim.isEmpty) return Seq.empty
 
-      if (value.startsWith("ge"))
-        s"$field:[${value.stripPrefix("ge")}T00:00:00Z TO *]"
-      else if (value.startsWith("gt"))
-        s"$field:{${value.stripPrefix("gt")}T00:00:00Z TO *]"
-      else if (value.startsWith("le"))
-        s"$field:[* TO ${value.stripPrefix("le")}T00:00:00Z]"
-      else if (value.startsWith("lt"))
-        s"$field:[* TO ${value.stripPrefix("lt")}T00:00:00Z}"
-      else
-        s"$field:$value"
+    params.split("&").toSeq.flatMap { param =>
+      param.split("=", 2) match {
+        case Array(field, value) => Some(buildSingleFilter(field, value))
+        case _                   => None
+      }
     }
   }
 
-  // -------------------------
+  private def buildSingleFilter(field: String, value: String): String = {
+
+    def isDate(v: String): Boolean =
+      v.matches("""\d{4}-\d{2}-\d{2}""")
+
+    if (value.startsWith("ge"))
+      buildRangeFilter(field, value.stripPrefix("ge"), ">=")
+    else if (value.startsWith("gt"))
+      buildRangeFilter(field, value.stripPrefix("gt"), ">")
+    else if (value.startsWith("le"))
+      buildRangeFilter(field, value.stripPrefix("le"), "<=")
+    else if (value.startsWith("lt"))
+      buildRangeFilter(field, value.stripPrefix("lt"), "<")
+    else
+      s"$field:$value"
+  }
+
+  private def buildRangeFilter(
+      field: String,
+      rawValue: String,
+      operator: String
+  ): String = {
+
+    val isDate = rawValue.matches("""\d{4}-\d{2}-\d{2}""")
+
+    val formattedValue =
+      if (isDate) s"${rawValue}T00:00:00Z"
+      else rawValue
+
+    operator match {
+      case ">=" => s"$field:[$formattedValue TO *]"
+      case ">"  => s"$field:{$formattedValue TO *]"
+      case "<=" => s"$field:[* TO $formattedValue]"
+      case "<"  => s"$field:[* TO $formattedValue}"
+    }
+  }
+
+  // -------------------------------------------------
   // Gestion Perimeter
-  // -------------------------
+  // -------------------------------------------------
   private def applyPerimeter(
       currentPatients: Dataset[String],
       perimeters: Seq[String]
