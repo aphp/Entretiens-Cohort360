@@ -26,8 +26,9 @@ INSTALLED_APPS = [
 
     # Third-party
     "rest_framework",
+    "corsheaders",
     "django_filters",
-    'drf_spectacular',
+    "drf_spectacular",
     # Local apps
     "medical",
 ]
@@ -40,6 +41,8 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -117,3 +120,10 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": "API REST pour la gestion des patients, médicaments et prescriptions",
     "VERSION": "1.0.0",
 }
+
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+]
+
+CORS_ALLOW_ALL_ORIGINS = False

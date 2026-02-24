@@ -15,25 +15,35 @@ class MedicationSerializer(serializers.ModelSerializer):
 
 
 class PrescriptionSerializer(serializers.ModelSerializer):
+    patient_name = serializers.SerializerMethodField()
+    medication_label = serializers.CharField(
+        source="medication.label", read_only=True
+    )
+
     class Meta:
         model = Prescription
         fields = [
             "id",
             "patient",
+            "patient_name",
             "medication",
+            "medication_label",
             "dosage",
             "start_date",
             "end_date",
             "status",
         ]
-        
-    def validate(self, attrs):
-        start_date = attrs.get("start_date")
-        end_date = attrs.get("end_date")
+
+    def get_patient_name(self, obj):
+        return f"{obj.patient.last_name} {obj.patient.first_name}"
+
+    def validate(self, data):
+        start_date = data.get("start_date")
+        end_date = data.get("end_date")
 
         if end_date and start_date and end_date < start_date:
             raise serializers.ValidationError(
                 {"end_date": "End date must be after start date."}
             )
 
-        return attrs
+        return data
