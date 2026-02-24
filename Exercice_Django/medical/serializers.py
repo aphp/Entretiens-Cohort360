@@ -26,3 +26,14 @@ class PrescriptionSerializer(serializers.ModelSerializer):
             "end_date",
             "status",
         ]
+        
+    def validate(self, attrs):
+        start_date = attrs.get("start_date")
+        end_date = attrs.get("end_date")
+
+        if end_date and start_date and end_date < start_date:
+            raise serializers.ValidationError(
+                {"end_date": "End date must be after start date."}
+            )
+
+        return attrs
