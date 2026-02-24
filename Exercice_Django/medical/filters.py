@@ -1,7 +1,6 @@
 import django_filters
 
-from .models import Patient, Medication
-from .models import Prescription
+from .models import Patient, Medication, Prescription
 
 
 class PatientFilter(django_filters.FilterSet):
@@ -35,7 +34,7 @@ class MedicationFilter(django_filters.FilterSet):
     class Meta:
         model = Medication
         fields = ["code", "label", "status"]
-        
+
 
 class PrescriptionFilter(django_filters.FilterSet):
     patient = django_filters.NumberFilter(field_name="patient_id")

@@ -1,12 +1,9 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 
-from .models import Patient, Medication
-from .filters import PatientFilter, MedicationFilter
-from .serializers import PatientSerializer, MedicationSerializer
-from .models import Prescription
-from .serializers import PrescriptionSerializer
-from .filters import PrescriptionFilter
+from .models import Patient, Medication, Prescription
+from .filters import PatientFilter, MedicationFilter, PrescriptionFilter
+from .serializers import PatientSerializer, MedicationSerializer, PrescriptionSerializer
 
 
 class PatientViewSet(viewsets.ReadOnlyModelViewSet):
