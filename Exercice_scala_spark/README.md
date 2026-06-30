@@ -1,4 +1,4 @@
-# Exercice Technique : Data Engineer Senior (Scala/Spark/Solr)
+# Exercice Technique : Data Engineer (Scala/Spark/Solr)
 
 Ce projet est une base de travail pour un test technique visant à évaluer la capacité d'un candidat à manipuler des
 données FHIR simplifiées avec scala Spark.
