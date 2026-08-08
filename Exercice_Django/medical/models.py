@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.exceptions import ValidationError
 
 
 class Patient(models.Model):
@@ -27,10 +28,44 @@ class Medication(models.Model):
 
     code = models.CharField(max_length=64, unique=True)
     label = models.CharField(max_length=255)
-    status = models.CharField(max_length=16, choices=STATUS_CHOICES, default=STATUS_ACTIF)
+    status = models.CharField(
+        # TODO could be shortened to 5 to reclaim DB space
+        max_length=16,
+        choices=STATUS_CHOICES,
+        default=STATUS_ACTIF,
+    )
 
     class Meta:
         ordering = ["code"]
 
     def __str__(self) -> str:  # pragma: no cover - simple repr
         return f"{self.code} - {self.label} ({self.status})"
+
+
+class Prescription(models.Model):
+    """Représente une prescription"""
+
+    STATUS_VALIDE = "valide"
+    STATUS_EN_ATTENTE = "en_attente"
+    STATUS_SUPPR = "suppr"
+    STATUS_CHOICES = (
+        (STATUS_VALIDE, "valide"),
+        (STATUS_SUPPR, "suppr"),
+        (STATUS_EN_ATTENTE, "en_attente"),
+    )
+
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, null=False)
+    medication = models.ForeignKey(Medication, on_delete=models.CASCADE, null=False)
+    status = models.CharField(
+        max_length=10, choices=STATUS_CHOICES, default=STATUS_VALIDE
+    )
+    begin_date = models.DateField(null=False)
+    end_date = models.DateField(null=False)
+    comment = models.CharField(max_length=1000, null=False, blank=True)
+
+    def save(self, *args, **kwargs):
+
+        if self.begin_date > self.end_date:
+            raise ValidationError(message="unordered prescription dates")
+
+        return super().save(*args, **kwargs)
