@@ -80,7 +80,36 @@ Endpoints
 - GET /Medication
     - Filtres: code, label, status (actif | suppr)
 
-- À implémenter par le candidat: /Prescription (voir Énoncé ci‑dessous)
+- Prescriptions (Nouvelle ressource)
+    - GET /Prescription
+    - GET /Prescription/{id}
+    - POST /Prescription
+    - PUT /Prescription/{id}
+    - PATCH /Prescription/{id}
+    - DELETE /Prescription/{id}
+
+- Champs:
+    - patient (id)
+    - medication (id)
+    - dosage
+    - start_date
+    - end_date (optionnel)
+    - status (active | completed | cancelled)
+
+- Filtres disponibles
+    - patient
+    - medication
+    - status
+    - start_date_gte
+    - start_date_lte
+    - end_date_gte
+    - end_date_lte
+
+Exemples 
+---------------
+- /Prescription?patient=1
+- /Prescription?status=active
+- /Prescription?start_date_gte=2024-01-01
 
 Exemples (curl)
 ---------------
@@ -89,11 +118,42 @@ Exemples (curl)
 - curl -s "http://127.0.0.1:8000/Patient?nom=Martin"
 - curl -s "http://127.0.0.1:8000/Medication?status=actif"
 
-Énoncé de l'exercice — Prescription
------------------------------------
-L'exercice prend la forme d'une Issue Git que pourrait donner une Product Owner du projet: [Issue-Prescriptions-001.md](Issue-Prescriptions-001.md)
-L’objectif est de concevoir une nouvelle ressource REST « Prescription », destinée à la gestion des prescriptions médicamenteuses des patients.
+Django Admin
+---------------
+Interface d’administration disponible via :
 
-Vous êtes libre de modifier le code existant et de proposer l’implémentation de votre choix.
-Le code fourni devra respecter les bonnes pratiques de développement, être pleinement fonctionnel.
-Les commentaires s'ils sont nécessaires doivent être clairs et pertinents.
+    http://127.0.0.1:8000/admin
+
+Créer un super utilisateur :
+```bash
+python manage.py createsuperuser
+```
+
+L’admin permet :
+- Gestion des patients
+- Gestion des médicaments
+- Gestion des prescriptions
+- Recherche et filtrage
+
+Documentation API (Swagger / OpenAPI)
+-------------------------------------
+Documentation interactive disponible via :
+
+    http://127.0.0.1:8000/api/docs/
+
+Schéma OpenAPI brut :
+
+    http://127.0.0.1:8000/api/schema/
+
+Tests
+-----
+
+Lancer les tests avec :
+```bash
+    python manage.py test
+```
+Les tests couvrent :
+- Listes patients et médicaments
+- Filtres
+- Création de prescription
+- Validation métier (end_date > start_date)
