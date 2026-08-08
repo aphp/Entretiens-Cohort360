@@ -4,7 +4,7 @@ from datetime import date, timedelta
 
 from django.core.management.base import BaseCommand
 
-from medical.models import Patient, Medication
+from medical.models import Patient, Medication, Prescription
 
 
 def random_date(start_year=1940, end_year=2025):
@@ -22,10 +22,12 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument("--patients", type=int, default=10)
         parser.add_argument("--medications", type=int, default=5)
+        parser.add_argument("--prescriptions", type=int, default=5)
 
     def handle(self, *args, **options):
         n_patients = options["patients"]
         n_meds = options["medications"]
+        n_prescriptions = options["prescriptions"]
 
         last_names = [
             "Martin", "Bernard", "Thomas", "Petit", "Robert",
@@ -86,6 +88,27 @@ class Command(BaseCommand):
             m = Medication.objects.create(code=code, label=label, status=status)
             created_meds.append(m)
 
+        created_prescriptions = []
+        for i in range(n_prescriptions):
+            patient = random.choice(created_patients)
+            medication = random.choice(created_meds)
+            start_date = random_date(2024, 2025)
+            end_date = start_date + timedelta(days=random.randint(1, 30))
+            presscription_status = random.choices(
+                [Prescription.STATUS_VALID, Prescription.STATUS_SUPPR, Prescription.STATUS_ATTENTE],
+                weights=[0.5, 0.2, 0.3]
+            )[0]
+            commentaire = "Prescription test."
+            prescription = Prescription.objects.create(
+                patient=patient,
+                medication=medication,
+                prescription_start_date=start_date,
+                prescription_end_date=end_date,
+                presscription_status=presscription_status,
+                commentaire=commentaire
+            )
+            created_prescriptions.append(prescription)
+
         self.stdout.write(self.style.SUCCESS(
-            f"Created {len(created_patients)} patients and {len(created_meds)} medications."
+            f"Created {len(created_patients)} patients and {len(created_meds)} medications and {len(created_prescriptions)} rescription ."
         ))
